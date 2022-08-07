@@ -155,6 +155,7 @@
                 <version>${mybatis-generator.version}</version>
             </dependency>
             <!-- MyBatis-->
+            <!--TODO 替换成mybatis-plus-->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>

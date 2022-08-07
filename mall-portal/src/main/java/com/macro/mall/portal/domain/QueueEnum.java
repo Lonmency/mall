@@ -9,11 +9,11 @@ import lombok.Getter;
 @Getter
 public enum QueueEnum {
     /**
-     * 消息通知队列
+     * 消息通知队列(取消订单队列)
      */
     QUEUE_ORDER_CANCEL("mall.order.direct", "mall.order.cancel", "mall.order.cancel"),
     /**
-     * 消息通知ttl队列
+     * 消息通知ttl队列(延时订单队列，消息会在队列里存放一定时间，超时后发送到取消消息队列)
      */
     QUEUE_TTL_ORDER_CANCEL("mall.order.direct.ttl", "mall.order.cancel.ttl", "mall.order.cancel.ttl");
 

@@ -77,6 +77,11 @@ public class JwtTokenUtil {
         String username;
         try {
             Claims claims = getClaimsFromToken(token);
+            /**
+             *     public String getSubject() {
+             *         return this.getString("sub");
+             *     }
+             */
             username = claims.getSubject();
         } catch (Exception e) {
             username = null;
@@ -130,7 +135,8 @@ public class JwtTokenUtil {
         if(StrUtil.isEmpty(oldToken)){
             return null;
         }
-        String token = oldToken.substring(tokenHead.length());
+        //以Bearer 开头
+        String token = oldToken.substring(tokenHead.length());//去掉token head
         if(StrUtil.isEmpty(token)){
             return null;
         }
@@ -148,6 +154,7 @@ public class JwtTokenUtil {
             return token;
         }else{
             claims.put(CLAIM_KEY_CREATED, new Date());
+            //产生新token
             return generateToken(claims);
         }
     }

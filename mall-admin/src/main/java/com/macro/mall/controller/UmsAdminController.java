@@ -1,6 +1,8 @@
 package com.macro.mall.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import com.macro.mall.common.annotation.LearningCompleted;
+import com.macro.mall.common.annotation.WithQuestion;
 import com.macro.mall.common.api.CommonPage;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.UmsAdminLoginParam;
@@ -57,7 +59,8 @@ public class UmsAdminController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult login(@Validated @RequestBody UmsAdminLoginParam umsAdminLoginParam) {
-        String token = adminService.login(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
+//        String token = adminService.login(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
+        String token = adminService.loginByAuthenticationManager(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
         if (token == null) {
             return CommonResult.validateFailed("用户名或密码错误");
         }
@@ -67,6 +70,7 @@ public class UmsAdminController {
         return CommonResult.success(tokenMap);
     }
 
+    @LearningCompleted
     @ApiOperation(value = "刷新token")
     @RequestMapping(value = "/refreshToken", method = RequestMethod.GET)
     @ResponseBody
@@ -82,9 +86,12 @@ public class UmsAdminController {
         return CommonResult.success(tokenMap);
     }
 
+    @WithQuestion(funcution ="getAdminInfo",queMessage = "为什么/admin/info的请求配置ignore了还是被springsecurity拦截了，为什么principal可以自动填充")
     @ApiOperation(value = "获取当前登录用户信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
+    //principal为JwtAuthenticationTokenFilter认证后添加到SecurityContext的Authentication对象,这里能实现自动填充
+    //推测免认证名单对JwtAuthenticationTokenFilter无效，即使是静态资源的请求也会走JwtAuthenticationTokenFilter
     public CommonResult getAdminInfo(Principal principal) {
         if(principal==null){
             return CommonResult.unauthorized(null);
@@ -97,11 +104,24 @@ public class UmsAdminController {
         data.put("icon", umsAdmin.getIcon());
         List<UmsRole> roleList = adminService.getRoleList(umsAdmin.getId());
         if(CollUtil.isNotEmpty(roleList)){
-            List<String> roles = roleList.stream().map(UmsRole::getName).collect(Collectors.toList());
-            data.put("roles",roles);
+            List<String> rolesName = roleList.stream().map(UmsRole::getName).collect(Collectors.toList());
+            data.put("roles",rolesName);
         }
         return CommonResult.success(data);
     }
+
+    @ApiOperation(value = "principaltest")
+    @RequestMapping(value = "/principaltest", method = RequestMethod.GET)
+    @ResponseBody
+    //为JwtAuthenticationTokenFilter认证后添加到SecurityContext的Authentication对象
+    //推测免认证名单对JwtAuthenticationTokenFilter无效，即使是静态资源的请求也会走JwtAuthenticationTokenFilter
+    public CommonResult testPrincipal(Principal principal) {
+
+        System.out.println("principal: " + principal);
+
+        return CommonResult.success("");
+    }
+
 
     @ApiOperation(value = "登出功能")
     @RequestMapping(value = "/logout", method = RequestMethod.POST)

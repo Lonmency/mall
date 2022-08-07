@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.macro.mall.bo.AdminUserDetails;
+import com.macro.mall.common.annotation.WithQuestion;
 import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.common.util.RequestUtil;
 import com.macro.mall.dao.UmsAdminRoleRelationDao;
@@ -20,7 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -59,6 +63,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     @Autowired
     private UmsAdminCacheService adminCacheService;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @Override
     public UmsAdmin getAdminByUsername(String username) {
         UmsAdmin admin = adminCacheService.getAdmin(username);
@@ -74,6 +81,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return null;
     }
 
+    @WithQuestion(funcution = "admin注册service" , queMessage = "Example相比xml有什么优势")
     @Override
     public UmsAdmin register(UmsAdminParam umsAdminParam) {
         UmsAdmin umsAdmin = new UmsAdmin();
@@ -82,9 +90,13 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         umsAdmin.setStatus(1);
         //查询是否有相同用户名的用户
         UmsAdminExample example = new UmsAdminExample();
+        //？ Criteria是干什么的
+        //创建查询条件
+        //TODO 改成mp
         example.createCriteria().andUsernameEqualTo(umsAdmin.getUsername());
         List<UmsAdmin> umsAdminList = adminMapper.selectByExample(example);
         if (umsAdminList.size() > 0) {
+            //用户已存在
             return null;
         }
         //将密码进行加密操作
@@ -94,10 +106,12 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         return umsAdmin;
     }
 
+    @WithQuestion(funcution = "admin登录login service" , queMessage = "为什么这里是自己手动对比登录密码")
     @Override
     public String login(String username, String password) {
         String token = null;
         //密码需要客户端加密后传递
+        //? 为什么不使用authenticationManager.authenticate
         try {
             UserDetails userDetails = loadUserByUsername(username);
             if(!passwordEncoder.matches(password,userDetails.getPassword())){
@@ -114,6 +128,26 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         } catch (AuthenticationException e) {
             LOGGER.warn("登录异常:{}", e.getMessage());
         }
+        return token;
+    }
+
+    @Override
+    public String loginByAuthenticationManager(String username, String password) {
+        String token = null;
+        Authentication authenticate = null;
+        try {
+            authenticate = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username,password));
+        } catch (BadCredentialsException e) {
+            LOGGER.warn("登录异常:{}", e.getMessage());
+            Asserts.fail("密码不正确");
+        }
+        UserDetails userDetails = (UserDetails) authenticate.getPrincipal();
+        if(!userDetails.isEnabled()){
+            Asserts.fail("帐号已被禁用");
+        }
+        token = jwtTokenUtil.generateToken(userDetails);
+        insertLoginLog(username);
         return token;
     }
 
@@ -262,6 +296,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         //获取用户信息
         UmsAdmin admin = getAdminByUsername(username);
         if (admin != null) {
+            //读取redis缓存数据
             List<UmsResource> resourceList = getResourceList(admin.getId());
             return new AdminUserDetails(admin,resourceList);
         }

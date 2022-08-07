@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * 后台用户缓存操作Service实现类
+ * redis缓存
  * Created by macro on 2020/3/13.
  */
 @Service

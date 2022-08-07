@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * 搜索商品的信息
  * Created by macro on 2018/6/19.
+ * pojo
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

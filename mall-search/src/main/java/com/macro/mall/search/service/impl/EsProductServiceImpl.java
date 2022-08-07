@@ -59,6 +59,7 @@ public class EsProductServiceImpl implements EsProductService {
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
     @Override
     public int importAll() {
+        //TODO 一次性加在大量数据可能会产生内存问题，应该改成分页
         List<EsProduct> esProductList = productDao.getAllEsProductList(null);
         Iterable<EsProduct> esProductIterable = productRepository.saveAll(esProductList);
         Iterator<EsProduct> iterator = esProductIterable.iterator();
@@ -67,6 +68,7 @@ public class EsProductServiceImpl implements EsProductService {
             result++;
             iterator.next();
         }
+        //导入数量
         return result;
     }
 
@@ -105,6 +107,9 @@ public class EsProductServiceImpl implements EsProductService {
         return productRepository.findByNameOrSubTitleOrKeywords(keyword, keyword, keyword, pageable);
     }
 
+    /**
+     * 根据关键字搜索名称或者副标题复合查询
+     */
     @Override
     public Page<EsProduct> search(String keyword, Long brandId, Long productCategoryId, Integer pageNum, Integer pageSize,Integer sort) {
         Pageable pageable = PageRequest.of(pageNum, pageSize);

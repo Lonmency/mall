@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 　　1.example是Mybatis数据层框架中的一个工具，可以帮我们完成sql语句中where条件句的书写，相当于where后面的部分，
+ *      我们可以根据不同的条件来查询和操作数据库，简化书写sql的过程。
+ *
+ * 　　2.用MyBatis的逆向工程可以自动生成Example类。
+ */
 public class UmsAdminExample {
     protected String orderByClause;
 
@@ -45,6 +51,8 @@ public class UmsAdminExample {
         return criteria;
     }
 
+    //一个Criteria里的criterionList里的条件都是and
+    //多个Criteria是or的关系
     public Criteria createCriteria() {
         Criteria criteria = createCriteriaInternal();
         if (oredCriteria.size() == 0) {
@@ -65,44 +73,45 @@ public class UmsAdminExample {
     }
 
     protected abstract static class GeneratedCriteria {
-        protected List<Criterion> criteria;
+        protected List<Criterion> criterionList;
 
         protected GeneratedCriteria() {
             super();
-            criteria = new ArrayList<>();
+            criterionList = new ArrayList<>();
         }
 
         public boolean isValid() {
-            return criteria.size() > 0;
+            return criterionList.size() > 0;
         }
 
         public List<Criterion> getAllCriteria() {
-            return criteria;
+            return criterionList;
         }
 
-        public List<Criterion> getCriteria() {
-            return criteria;
+        public List<Criterion> getCriterionList() {
+            return criterionList;
         }
 
         protected void addCriterion(String condition) {
             if (condition == null) {
                 throw new RuntimeException("Value for condition cannot be null");
             }
-            criteria.add(new Criterion(condition));
+            criterionList.add(new Criterion(condition));
         }
 
         protected void addCriterion(String condition, Object value, String property) {
             if (value == null) {
                 throw new RuntimeException("Value for " + property + " cannot be null");
             }
-            criteria.add(new Criterion(condition, value));
+            //添加到list里
+            criterionList.add(new Criterion(condition, value));
         }
 
         protected void addCriterion(String condition, Object value1, Object value2, String property) {
             if (value1 == null || value2 == null) {
                 throw new RuntimeException("Between values for " + property + " cannot be null");
             }
-            criteria.add(new Criterion(condition, value1, value2));
+            criterionList.add(new Criterion(condition, value1, value2));
         }
 
         public Criteria andIdIsNull() {
