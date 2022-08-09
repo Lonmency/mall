@@ -34,6 +34,7 @@ public class UmsMemberController {
     private UmsMemberService memberService;
 
     @ApiOperation("会员注册")
+    //TODO 推测前段页面在点击注册按钮的时候，在发送请求到"/register"之前，还会再发送请求到/getAuthCode来生成验证码
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult register(@RequestParam String username,

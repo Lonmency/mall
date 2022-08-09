@@ -110,9 +110,11 @@ public class UmsMemberServiceImpl implements UmsMemberService {
     public String generateAuthCode(String telephone) {
         StringBuilder sb = new StringBuilder();
         Random random = new Random();
-        for(int i=0;i<6;i++){
-            sb.append(random.nextInt(10));
-        }
+        //TODO 目前是随机数或者设置固定值，以后可以改成真正的验证码
+        sb.append("123123");
+//        for(int i=0;i<6;i++){
+//            sb.append(random.nextInt(10));
+//        }
         memberCacheService.setAuthCode(telephone,sb.toString());
         return sb.toString();
     }

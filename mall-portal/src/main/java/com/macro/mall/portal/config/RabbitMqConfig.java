@@ -29,6 +29,7 @@ public class RabbitMqConfig {
     @Bean
     DirectExchange orderTtlDirect() {
         return (DirectExchange) ExchangeBuilder
+                //交换机为direct模式
                 .directExchange(QueueEnum.QUEUE_TTL_ORDER_CANCEL.getExchange())
                 .durable(true)
                 .build();
@@ -62,7 +63,7 @@ public class RabbitMqConfig {
         return BindingBuilder
                 .bind(orderQueue)
                 .to(orderDirect)
-                .with(QueueEnum.QUEUE_ORDER_CANCEL.getRouteKey());
+                .with(QueueEnum.QUEUE_ORDER_CANCEL.getRouteKey());//路由
     }
 
     /**

@@ -8,7 +8,7 @@ import com.macro.mall.common.exception.Asserts;
 import com.macro.mall.common.service.RedisService;
 import com.macro.mall.mapper.*;
 import com.macro.mall.model.*;
-import com.macro.mall.portal.component.CancelOrderSender;
+import com.macro.mall.portal.component.TtlCancelOrderSender;
 import com.macro.mall.portal.dao.PortalOrderDao;
 import com.macro.mall.portal.dao.PortalOrderItemDao;
 import com.macro.mall.portal.dao.SmsCouponHistoryDao;
@@ -64,7 +64,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     @Autowired
     private OmsOrderItemMapper orderItemMapper;
     @Autowired
-    private CancelOrderSender cancelOrderSender;
+    private TtlCancelOrderSender cancelOrderSender;
 
     @Override
     public ConfirmOrderResult generateConfirmOrder(List<Long> cartIds) {
@@ -321,6 +321,7 @@ public class OmsPortalOrderServiceImpl implements OmsPortalOrderService {
     public void sendDelayMessageCancelOrder(Long orderId) {
         //获取订单超时时间
         OmsOrderSetting orderSetting = orderSettingMapper.selectByPrimaryKey(1L);
+        //目前数据库设置的是两分钟
         long delayTimes = orderSetting.getNormalOrderOvertime() * 60 * 1000;
         //发送延迟消息
         cancelOrderSender.sendMessage(orderId, delayTimes);
